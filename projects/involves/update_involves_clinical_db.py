@@ -45,6 +45,7 @@ def update_involves_clinical_db(environment,domain,username,password,engine_type
 
 
 if __name__ == '__main__':
+    
     update_involves_clinical_db(environment=5,domain='dkt',username='sistemas',password='sistemas',engine_type='mssql',database='Involves',server='172.16.0.7')
     
 
