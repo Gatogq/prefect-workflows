@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table, select
+from sqlalchemy import create_engine, MetaData, Table, select, and_
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError,OperationalError,SQLAlchemyError
 
@@ -69,8 +69,25 @@ class SQLServerEngine:
             with self.engine.connect() as connection:
 
                     update_data = df.to_dict(orient='records')
+                    
                     for data in update_data:
-                        statement = table.update().where(table.c[primary_key] == data[primary_key]).values(data)
+
+                        if isinstance(primary_key,str):
+
+                            condition = table.c[primary_key] == data[primary_key]
+                        
+                        elif isinstance(primary_key,(list,tuple)):
+
+                            cds = [getattr(table.c,k) == data[k] for k in primary_key]
+
+                            condition = and_(*cds)
+
+                        else:
+                            raise ValueError('Invalid data type for parameter primary key: it must be a str or a tuple/list')
+                        
+                        statement = table.update().where(condition).values(data)
+
+
                         connection.execute(statement)
 
 
@@ -79,7 +96,7 @@ class SQLServerEngine:
         except Exception as e:
 
             raise SQLAlchemyError(f'Error al intentar actualizar registros en la tabla {table_name}: {e}')
-
+        
     def get_columns_from_table(self, table):
 
         if self.engine_type == 'mssql':

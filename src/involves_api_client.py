@@ -174,10 +174,12 @@ class InvolvesAPIClient(Session):
 
         return self.request(url=f'{self.base_url}/v3/environments/{self.environment}/employees/{employeeId}',method='GET')
     
-    def get_regions(self,name=None,employeeId=None):
+    def get_regions(self,name=None,employeeId=None,select=None):
 
         params = self.create_params(name=name,employeeId=employeeId)
-        return self.request(url=f'{self.base_url}/v3/environments/{self.environment}/regionals',method='GET',params=params)
+        data = self.request(url=f'{self.base_url}/v3/environments/{self.environment}/regionals',method='GET',params=params)
+        
+        return self.select_fields(data=data,fields=select)
     
     def get_region_by_id(self,regionalId):
 
@@ -206,7 +208,20 @@ class InvolvesAPIClient(Session):
 
     def get_form_response_by_id(self,surveyId):
 
-        return self.request(url=f'/v3/environments/{self.environment}/surveys/{surveyId}',method='GET')
+        return self.request(url=f'{self.base_url}/v3/environments/{self.environment}/surveys/{surveyId}',method='GET')
+    
+    def get_channels(self):
+
+       return self.request(url=f'{self.base_url}/v3/pointofsalechannels',method='GET')
+    
+    def get_chains(self,select=None):
+
+        data = self.request(url=f'{self.base_url}/v1/{self.environment}/chain',method='GET')
+        return self.select_fields(data=data,fields=select) 
+    
+
+    
+
 
 
 
