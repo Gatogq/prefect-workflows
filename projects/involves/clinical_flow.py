@@ -44,6 +44,7 @@ def update_involves_clinical_db(environment,domain,username,password,engine_type
 
 
 
+
 if __name__ == '__main__':
 
    from dotenv import load_dotenv
@@ -64,4 +65,3 @@ if __name__ == '__main__':
 
    update_involves_clinical_db(environment,domain,username,password,'mssql',database,server)
 
-   
