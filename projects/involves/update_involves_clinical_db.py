@@ -45,8 +45,23 @@ def update_involves_clinical_db(environment,domain,username,password,engine_type
 
 
 if __name__ == '__main__':
-    
-    update_involves_clinical_db(environment=5,domain='dkt',username='sistemas',password='sistemas',engine_type='mssql',database='Involves',server='172.16.0.7')
-    
 
-      
+   from dotenv import load_dotenv
+   import os
+
+   env_vars_path = env = os.path.abspath(os.path.join(os.path.dirname(__file__),'..','..','config','.env'))
+
+   load_dotenv(env_vars_path)
+
+   
+
+   environment = int(os.getenv('CLINICAL_ENVIRONMENT'))
+   domain = os.getenv('INVOLVES_DOMAIN')
+   username = os.getenv('INVOLVES_USERNAME')
+   password = os.getenv('INVOLVES_PASSWORD')
+   database = os.getenv('CLINICAL_DATABASE')
+   server = os.getenv('SERVER')
+
+   update_involves_clinical_db(environment,domain,username,password,'mssql',database,server)
+
+

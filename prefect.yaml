@@ -15,12 +15,35 @@ push: null
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
 - prefect.deployments.steps.git_clone:
-    repository: '{{ repository }}'
-    branch: '{{ branch }}'
+    repository: https://github.com/Gatogq/prefect-workflows.git
+    branch: main
     access_token: null
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
+- name: actualizacion_db_clinical_involves
+  version:
+  tags: []
+  description:
+  entrypoint: ./projects/Involves/update_involves_clinical_db.py:update_involves_clinical_db
+  parameters:
+    environment: 5
+    domain: "{{prefect.blocks.json.involves-env-vars.DOMAIN}}"
+    username: "{{prefect.blocks.json.involves-env-vars.USERNAME}}"
+    password: "{{prefect.blocks.json.involves-env-vars.PASSWORD}}"
+    engine_type: "{{prefect.blocks.json.involves-env-vars.ENGINE}}"
+    database: "{{prefect.blocks.json.involves-env-vars.DATABASE}}"
+    server: "{{prefect.blocks.json.involves-env-vars.SERVER}}"
+
+  work_pool:
+    name: involves-env
+    work_queue_name:
+    job_variables: {}
+    
+  schedules:
+    - cron: "0 7,9,11,13,15,17,18,23 * * *"
+      timezone: "America/Mexico_City"
+      active: true
 - name: null
   version: null
   tags: []
