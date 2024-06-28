@@ -21,14 +21,14 @@ def update_involves_clinical_db(environment,domain,username,password,engine_type
                                         'chain_id','pointOfSaleChannel_id',
                                         'address_zipCode','address_city_name',
                                         'address_city_state_name','address_latitude',
-                                        'address_longitude','deleted'],table='PointOfSale2',primary_key='id'
+                                        'address_longitude','deleted'],table='PointOfSale',primary_key='id'
                                     )
     employees = get_employee_data.submit(Client=Client,SQLSession=SQLSession,
                                         fields=['id','name','nationalIdCard2','userGroup_name','email','enabled','fieldTeam'],
-                                        table='Employee2',primary_key='id'
+                                        table='Employee',primary_key='id'
                                          )
     visits = get_visit_data.submit(SQLSession,username,password,environment,domain,fields=['visit_date','customer_id','employee_name',
-                                        'visit_status','check_in','check_out'],table='Visit2')
+                                        'visit_status','check_in','check_out'],table='Visit')
     
     channels = get_channel_data.submit(Client=Client,SQLSession=SQLSession,table='Channel',primary_key='id')
     
@@ -38,7 +38,7 @@ def update_involves_clinical_db(environment,domain,username,password,engine_type
 
 
     update_table.map(SQLSession,dfs=[pos,employees,channels,chains,regions,visits],
-                     table=['PointOfSale2','Employee2','Channel','Chain','Region','Visit2'],
+                     table=['PointOfSale','Employee','Channel','Chain','Region','Visit'],
                      primary_key=['id','id','id','id','id',['visit_date','customer_id']])
 
 
@@ -64,4 +64,4 @@ if __name__ == '__main__':
 
    update_involves_clinical_db(environment,domain,username,password,'mssql',database,server)
 
-
+   
