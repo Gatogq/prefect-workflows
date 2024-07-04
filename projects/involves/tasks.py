@@ -1,7 +1,6 @@
 import sys
 from os.path import abspath, join
 from os import getcwd
-
 project_dir = abspath(join(getcwd(), './'))
 sys.path.insert(0, project_dir)
 
@@ -66,7 +65,9 @@ def get_pointofsale_data(Client,SQLSession,fields,table,primary_key):
 
     if rows:
             
-        df = DataFrame(rows).assign(updated_at=timestamp).map(set_null_values).replace({nan:None})
+        df = DataFrame(rows).assign(updated_at=timestamp)
+        
+        df = df.map(set_null_values).replace({nan:None})
 
         ids = set(SQLSession.select_values(table,columns=[primary_key]))
 

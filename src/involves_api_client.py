@@ -100,7 +100,7 @@ class InvolvesAPIClient(Session):
                         key: extract_json_keys(value,key) for key in fields
                         }
                     for value in data
-                ]
+                  ]
             if isinstance(data,dict):
 
                 result = {}
