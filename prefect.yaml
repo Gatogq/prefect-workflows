@@ -25,7 +25,7 @@ deployments:
   version:
   tags: []
   description:
-  entrypoint: ./projects/Involves/clinical_flow.py:update_involves_clinical_db
+  entrypoint: ./projects/Involves/flows.py:update_involves_clinical_db
   parameters:
     environment: 5
     domain: "{{prefect.blocks.json.involves-env-vars.DOMAIN}}"
