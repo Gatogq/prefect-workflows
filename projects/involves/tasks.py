@@ -232,7 +232,3 @@ def get_region_data(Client,SQLSession,table,fields,primary_key):
           'insert': df_to_insert,
           'update':df_to_update
           }
-
-
-      
-      
