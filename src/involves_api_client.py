@@ -1,3 +1,9 @@
+import sys
+from os.path import abspath, join
+from os import getcwd
+project_dir = abspath(join(getcwd(), './'))
+sys.path.insert(0, project_dir)
+
 from requests import Session
 from requests.auth import HTTPBasicAuth
 from utils.utilities import extract_json_keys
@@ -85,12 +91,14 @@ class InvolvesAPIClient(Session):
 
             if value is not None and value != 'select':
 
+
                 params[key] = value
         
         return params
     
     @staticmethod
     def select_fields(data,fields):
+
 
         if fields:
         
@@ -120,8 +128,9 @@ class InvolvesAPIClient(Session):
                     result[key] = temp
 
                 return result
-            else:
-                return data
+            
+        else :
+            return data
 
     def get_pointsofsale(self,name=None,active=None,updatedAtMillis=None,select=None):
 
@@ -185,10 +194,16 @@ class InvolvesAPIClient(Session):
 
         return self.request(url=f'{self.base_url}/v3/environments/{self.environment}/regionals/{regionalId}',method='GET')
     
-    def get_employee_absences(self,employeeEnvironmentId=None,startDate=None,endDate=None):
+    def get_macroregional_by_id(self,macroregionalId):
 
-        params = self.create_params(employeeEnvironmentId,startDate,endDate)
-        return self.request(url=f'{self.base_url}/v1/{self.environment}/employeeabsence',method='GET',params=params)
+        return self.request(url=f'{self.base_url}/v3/environments/{self.environment}/macroregionals/{macroregionalId}',method='GET')
+
+    def get_employee_absences(self,employeeEnvironmentId=None,startDate=None,endDate=None,select=None):
+
+        params = self.create_params(employeeEnvironmentId=employeeEnvironmentId,startDate=startDate,endDate=endDate)
+        data =  self.request(url=f'{self.base_url}/v1/{self.environment}/employeeabsence',method='GET',params=params)
+
+        return self.select_fields(data=data,fields=select)
 
 
     def get_activated_forms(self):
@@ -201,14 +216,16 @@ class InvolvesAPIClient(Session):
         return self.request(url=f'{self.base_url}/v1/{self.environment}/form/formFields/{formId}',method='GET')
 
 
-    def get_form_responses(self,ownerId,status,formIds):
+    def get_answered_surveys(self,ownerId=None,status=None,formIds=None,select=None):
 
-        params = self.create_params(ownerId,status,formIds)
-        return self.request(url=f'{self.base_url}/v3/environments/{self.environment}/surveys',method='GET',params=params)
+        params = self.create_params(ownerId=ownerId,status=status,formIds=formIds)
+        data =  self.request(url=f'{self.base_url}/v3/environments/{self.environment}/surveys',method='GET',params=params)
+        return self.select_fields(data=data,fields=select)
 
-    def get_form_response_by_id(self,surveyId):
+    def get_survey_response_by_id(self,surveyId=None,select=None):
 
-        return self.request(url=f'{self.base_url}/v3/environments/{self.environment}/surveys/{surveyId}',method='GET')
+        data = self.request(url=f'{self.base_url}/v3/environments/{self.environment}/surveys/{surveyId}',method='GET')
+        return self.select_fields(data=data,fields=select)
     
     def get_channels(self):
 
@@ -218,10 +235,6 @@ class InvolvesAPIClient(Session):
 
         data = self.request(url=f'{self.base_url}/v1/{self.environment}/chain',method='GET')
         return self.select_fields(data=data,fields=select) 
-    
-
-    
-
 
 
 

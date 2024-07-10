@@ -1,5 +1,4 @@
-from tasks import get_pointofsale_data,get_employee_data,get_visit_data
-from tasks import get_channel_data,get_chain_data,get_region_data,update_table
+from tasks import *
 from prefect import flow
 from utils.webhooks import success_hook,failure_hook
 from src.involves_api_client import InvolvesAPIClient
@@ -79,6 +78,25 @@ def update_involves_clinical_db(environment,domain,username,password,engine_type
                      )
 
 
+@flow(name='actualizar_encuestas',
+      log_prints=True,
+      )
+
+def update_surveys(Client: InvolvesAPIClient,SQLSession: SQLServerEngine, formIds: list):
+
+
+    survey, survey_answers = get_survey_data(Client,SQLSession,'Survey','id',formIds=formIds)
+
+    tables_to_insert = {
+
+        'Survey': survey,
+
+        'SurveyAnswer': survey_answers
+    }
+
+    insert_records_into_table(SQLSession,tables_to_insert)
+
+
 @flow(name='integracion_SQL_involves_dkt',
       log_prints=True,
       on_completion=[success_hook],
@@ -136,7 +154,17 @@ def update_involves_dkt_db(environment,domain,username,password,engine_type,data
 
     ]
 
-    pos = get_pointofsale_data.submit(Client=Client,SQLSession=SQLSession,fields=pos_fields,table='PointOfSale2',primary_key='id')
+    absence_fields = [
+        
+        'id',
+        'absenceStartDate',
+        'absenceEndDate',
+        'employeeEnvironmentSuspended_id',
+        'reasonNote',
+        'absenceNote'
+    ]
+
+    pos = get_pointofsale_data.submit(Client=Client,SQLSession=SQLSession,fields=pos_fields,table='PointOfSale',primary_key='id')
 
     employees = get_employee_data.submit(Client=Client,SQLSession=SQLSession,fields=employee_fields,table='Employee',primary_key='id')
 
@@ -148,14 +176,28 @@ def update_involves_dkt_db(environment,domain,username,password,engine_type,data
 
     regions = get_region_data.submit(Client=Client,SQLSession=SQLSession,fields=['id','name','macroregional_id'],table='Region',primary_key='id')
 
+    macroregion_ids = set(SQLSession.select_values(table='Region',columns=['macroregional_id']))
+
+    macroregions = get_macroregional_data.submit(Client=Client,SQLSession=SQLSession,ids=macroregion_ids,table='MacroRegional',primary_key='id')
+
+    absences = get_employee_absence_data.submit(Client=Client,SQLSession=SQLSession,table='EmployeeAbsence',fields=absence_fields,primary_key='id')
+
+    forms = get_form_data.submit(Client=Client,SQLSession=SQLSession,table='Form',primary_key='id')
+
+    form_ids = set(SQLSession.select_values(table='Form',columns=['id']))
+
+    form_fields = get_form_fields_data.submit(Client=Client,SQLSession=SQLSession,ids=form_ids,table='FormField',primary_key='id')
+
 
     update_table.map(SQLSession,
-                     dfs=[pos,employees,channels,chains,regions,visits],
-                     table=['PointOfSale2','Employee','Channel','Chain','Region','Visit'],
-                     primary_key=['id','id','id','id','id',['visit_date','customer_id']]
-                     )
+                dfs=[pos,employees,channels,chains,regions,visits,macroregions,absences,forms,form_fields],
+                table=['PointOfSale','Employee','Channel','Chain','Region','Visit','MacroRegional','EmployeeAbsence','Form','FormField'],
+                primary_key=['id','id','id','id','id',['visit_date','customer_id'],'id','id','id','id']
+                )
+    
+    update_surveys(Client,SQLSession,formIds=[16,111])
 
-
+ 
 if __name__ == '__main__':
 
    from dotenv import load_dotenv

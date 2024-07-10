@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, MetaData, Table, select, and_
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError,OperationalError,SQLAlchemyError
+from sqlalchemy.orm import sessionmaker
 
 class SQLServerEngine:
 
@@ -16,6 +17,7 @@ class SQLServerEngine:
             self.connection_url = f'sqlite:///{database}'
 
         self.engine = create_engine(self.connection_url)
+        self.Session = sessionmaker(bind=self.engine)
 
 
     def execute_query(self,query):
@@ -41,68 +43,87 @@ class SQLServerEngine:
         
         return set([row[0] for row in r])
     
-    def bulk_insert_from_df(self, table_name, df):
-        
-        metadata = MetaData()
-        table = Table(table_name, metadata, autoload=True, autoload_with=self.engine)
-
-        d = df.to_dict(orient='records')
+    def bulk_insert_from_df(self,table_data):
 
         try:
 
-            with self.engine.connect() as connection:
-                connection.execute(table.insert(), d)
+            with self.Session() as session:
 
-            print(f'Se insertaron correctamente los nuevos registros en la tabla {table_name}. Se añadieron {len(df)} registros')
+                for table_name,df in table_data.items():
+
+                    if not df.empty:
+
+                        d = df.to_dict(orient='records')
+
+                        metadata = MetaData()
+                        table = Table(table_name, metadata, autoload=True, autoload_with=self.engine)
+                
+                        session.execute(table.insert(), d)
+
+                session.commit()
+
+                for table_name,df in table_data.items():
+
+                    print(f'Se insertaron correctamente los nuevos registros en la tabla {table_name}. Se añadieron {len(df)} registros')
 
         except Exception as e:
-            raise SQLAlchemyError(f'Error al intentar actualizar la tabla {table_name}: {e}')
+
+            session.rollback()
+
+            tables = ', '.join(list(table_data.keys()))
+
+            raise SQLAlchemyError(f'Error al intentar actualizar las tablas {tables}: {e}')
 
         
     
     def update_records_from_df(self, table_name, df, primary_key):
-        
-        metadata = MetaData()
-        table = Table(table_name, metadata, autoload=True, autoload_with=self.engine)
+
+        update_data = df.to_dict(orient='records')
 
         try:
-            with self.engine.connect() as connection:
 
-                    update_data = df.to_dict(orient='records')
+            with self.Session() as session:
                     
-                    for data in update_data:
+                metadata = MetaData()
+                table = Table(table_name, metadata, autoload=True, autoload_with=self.engine)
 
-                        if isinstance(primary_key,str):
+                    
+                for data in update_data:
 
-                            condition = table.c[primary_key] == data[primary_key]
+                    if isinstance(primary_key,str):
+
+                        condition = table.c[primary_key] == data[primary_key]
                         
-                        elif isinstance(primary_key,(list,tuple)):
+                    elif isinstance(primary_key,(list,tuple)):
 
-                            cds = [getattr(table.c,k) == data[k] for k in primary_key]
+                        cds = [getattr(table.c,k) == data[k] for k in primary_key]
 
-                            condition = and_(*cds)
+                        condition = and_(*cds)
 
-                        else:
-                            raise ValueError('Invalid data type for parameter primary key: it must be a str or a tuple/list')
+                    else:
+                        raise ValueError('Invalid data type for parameter primary key: it must be a str or a tuple/list')
                         
-                        statement = table.update().where(condition).values(data)
+                    statement = table.update().where(condition).values(data)
 
+                    session.execute(statement)
+                
+                session.commit()
 
-                        connection.execute(statement)
-
-
-            print(f'Se actualizaron correctamente los registros de la tabla {table_name}. Se modificaron {len(df)} registros.')
+                print(f'Se actualizaron correctamente los registros de la tabla {table_name}. Se modificaron {len(df)} registros.')
 
         except Exception as e:
 
+            session.rollback()
             raise SQLAlchemyError(f'Error al intentar actualizar registros en la tabla {table_name}: {e}')
+        
+
         
     def get_columns_from_table(self, table):
 
         if self.engine_type == 'mssql':
 
             r = self.execute_query(f'''SELECT COLUMN_NAME
-                                FROM INFORMATION_sCHEMA.COLUMNS
+                                FROM INFORMATION_SCHEMA.COLUMNS
                                WHERE TABLE_NAME = '{table}'
                                  ''')
             return [row[0] for row in r]
@@ -161,4 +182,3 @@ class SQLServerEngine:
         else:
 
             return [row[0] for row in r]
-
