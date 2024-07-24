@@ -27,9 +27,9 @@ def get_records(Session : SQLServerEngine,APIClient : BusinessCentralAPIClient,e
 
     columns = [_['endpoint_field'] for _ in fields.values()]
 
-    inserted_records = [] 
+    records_to_insert = [] 
     
-    modified_records = []
+    records_to_update = []
 
     #make api calls using the following query parameters: $select to retrieve only required columns and 
     # $filter to fetch only records created and modified after last database update.
@@ -40,7 +40,7 @@ def get_records(Session : SQLServerEngine,APIClient : BusinessCentralAPIClient,e
 
         #set column names and apply custom null logic as specified on db_schema.json
 
-        inserted_records = [transform_record(_, fields) for _ in data]
+        records_to_insert = [transform_record(_, fields) for _ in data]
 
     if allowed_operations['update']:
 
@@ -49,16 +49,16 @@ def get_records(Session : SQLServerEngine,APIClient : BusinessCentralAPIClient,e
 
         #set column names and apply custom null logic as specified on db_schema.json
 
-        modified_records = [transform_record(_, fields) for _ in data]
+        records_to_update = [transform_record(_, fields) for _ in data]
 
         #filter out modified records that are also new records
 
-        modified_records = [_ for _ in modified_records if _ not in inserted_records]
+        records_to_update = [_ for _ in records_to_update if _ not in records_to_insert]
 
 
         #return a dictionary containing the list of dictionaries to insert and to update on sql table.
 
-    result = {'insert' : inserted_records, 'update' : modified_records}
+    result = {'insert' : records_to_insert, 'update' : records_to_update}
 
     return result
 
