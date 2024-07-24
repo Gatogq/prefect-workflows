@@ -1,0 +1,140 @@
+{
+    "tables": {
+        "SalesHeader": {
+            "endpoint": "SQLSalesHeader",
+            "fields": {
+                "entryNo": {
+                    "endpoint_field": "entryNo",
+                    "type": "int",
+                    "apply_null_format": false,
+                    "primary_key": true
+                },
+                "postingDate": {
+                    "endpoint_field": "postingDate",
+                    "type": "date",
+                    "apply_null_format": false
+                },
+                "documentDate": {
+                    "endpoint_field": "documentDate",
+                    "type": "date",
+                    "apply_null_format": false
+                },
+                "documentType": {
+                    "endpoint_field": "DocType",
+                    "type": "int",
+                    "apply_null_format": false
+                },
+                "documentNo": {
+                    "endpoint_field": "documentNo",
+                    "type": "str",
+                    "apply_null_format": false
+                },
+                "customerNo": {
+                    "endpoint_field": "customerNo",
+                    "type": "str",
+                    "apply_null_format": false
+                },
+                "currencyCode": {
+                    "endpoint_field": "currencyCode",
+                    "type": "str",
+                    "apply_null_format": false
+                },
+                "amount": {
+                    "endpoint_field": "amount",
+                    "type": "float",
+                    "apply_null_format": false
+                },
+                "amountLCY": {
+                    "endpoint_field": "amountLCY",
+                    "type": "float",
+                    "apply_null_format": false
+                },
+                "positive": {
+                    "endpoint_field": "positive",
+                    "type": "bool",
+                    "apply_null_format": false
+                },
+                "transactionNo": {
+                    "endpoint_field": "transactionNo",
+                    "type": "int",
+                    "apply_null_format": false
+                },
+                "externalDocumentNo": {
+                    "endpoint_field": "externalDocumentNo",
+                    "type": "str",
+                    "apply_null_format": false
+                },
+                "substitutionEntryNo": {
+                    "endpoint_field": "substitutionEntryNo",
+                    "type": "int",
+                    "apply_null_format": true
+                },
+                "markedAsCanceled": {
+                    "endpoint_field": "markedAsCanceled",
+                    "type": "bool",
+                    "apply_null_format": false
+                },
+                "open": {
+                    "endpoint_field": "open",
+                    "type": "bool",
+                    "apply_null_format": false
+                },
+                "reversed": {
+                    "endpoint_field": "reversed",
+                    "type": "bool",
+                    "apply_null_format": false
+                },
+                "closedByEntryNo": {
+                    "endpoint_field": "closedByEntryNo",
+                    "type": "int",
+                    "apply_null_format": true
+                },
+                "closedAtDate": {
+                    "endpoint_field": "closedAtDate",
+                    "type": "date",
+                    "apply_null_format": true
+                },
+                "appliesToExtDocNo": {
+                    "endpoint_field": "appliesToExtDocNo",
+                    "type": "str",
+                    "apply_null_format": true
+                },
+                "reversedByEntryNo": {
+                    "endpoint_field": "reversedByEntryNo",
+                    "type": "int",
+                    "apply_null_format": true
+                },
+                "reversedEntryNo": {
+                    "endpoint_field": "reversedEntryNo",
+                    "type": "int",
+                    "apply_null_format": true
+                },
+                "balAccountNo": {
+                    "endpoint_field": "balAccountNo",
+                    "type": "str",
+                    "apply_null_format": true
+                },
+                "electronicDocumentStatus": {
+                    "endpoint_field": "electronicDocumentStatus",
+                    "type": "str",
+                    "apply_null_format": true
+                },
+                "systemCreatedAt": {
+                    "endpoint_field": "systemCreatedAt",
+                    "type": "datetime2",
+                    "apply_null_format": false
+                },
+                "systemModifiedAt": {
+                    "endpoint_field": "systemModifiedAt",
+                    "type": "datetime2",
+                    "apply_null_format": false
+                }
+            },
+            "allowed_operations": {
+                "insert": true,
+                "update": true,
+                "delete": false
+            }
+        }
+    }
+}
