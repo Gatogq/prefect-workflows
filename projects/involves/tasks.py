@@ -118,9 +118,8 @@ def get_employee_data(Client,SQLSession,fields,table,primary_key):
 
      timestamp = int(datetime.now().timestamp()*1000)
 
-     last_update_timestamp = SQLSession.get_last_update(table,time_column='updated_at')
 
-     rows = Client.get_employees(select=fields,updatedAtMillis=last_update_timestamp)
+     rows = Client.get_employees(select=fields)
 
      if rows:
             
@@ -263,10 +262,13 @@ def get_macroregional_data(Client,SQLSession,ids,table,primary_key):
     rows = list()
 
     for _ in ids:
-          
-        macroregion = Client.get_macroregional_by_id(_)
 
-        rows.append(macroregion)
+        try:  
+            macroregion = Client.get_macroregional_by_id(_)
+            rows.append(macroregion)
+            
+        except:
+             continue
 
     if rows:
             

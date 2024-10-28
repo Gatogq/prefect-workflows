@@ -9,3 +9,4 @@ env
 venv
 example.db
 .vscode
+tests.py
